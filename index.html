@@ -507,7 +507,7 @@ function update() {
   } else {
     const next = upcoming[0];
     const dMin = next.diffMin;
-    cdMin.textContent = dMin === 0 ? 'HAYDİ' : dMin;
+    cdMin.textContent = dMin === 0 ? 'KOŞ!' : dMin;
     if (dMin === 0) { cdMin.className = 'countdown-min now'; cdUnit.textContent = 'tren giriyor!'; }
     else if (dMin <= 3) { cdMin.className = 'countdown-min urgent'; cdUnit.textContent = 'dakika'; }
     else { cdMin.className = 'countdown-min'; cdUnit.textContent = 'dakika'; }
