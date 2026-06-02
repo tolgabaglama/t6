@@ -18,12 +18,9 @@
     --amber-dim: #78500a;
     --amber-glow: rgba(245,158,11,0.12);
     --green: #10b981;
-    --green-dim: #064e3b;
-    --blue: #3b82f6;
     --red: #ef4444;
     --text: #e2e8f0;
     --muted: #64748b;
-    --dot: #f59e0b;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -36,7 +33,6 @@
     user-select: none;
   }
 
-  /* Header */
   .header {
     background: var(--panel);
     border-bottom: 1px solid var(--border);
@@ -72,22 +68,23 @@
     text-transform: uppercase;
   }
 
-  /* Durak seçici */
+  /* Durak seçici - 4 buton, 2x2 grid */
   .stop-selector {
-    padding: 12px 16px;
-    display: flex;
-    gap: 8px;
+    padding: 12px 16px 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
   }
   .stop-btn {
-    flex: 1;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 10px 8px;
+    padding: 9px 8px;
     text-align: center;
     cursor: pointer;
     transition: all 0.15s;
     -webkit-tap-highlight-color: transparent;
+    position: relative;
   }
   .stop-btn.active {
     background: var(--amber-glow);
@@ -108,10 +105,21 @@
     display: block;
     margin-top: 2px;
   }
+  .terminal-tag {
+    position: absolute;
+    top: 4px; right: 5px;
+    font-size: 8px;
+    background: #1e3a1e;
+    color: #4ade80;
+    border-radius: 4px;
+    padding: 1px 4px;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
 
   /* Yön seçici */
   .dir-selector {
-    padding: 0 16px 12px;
+    padding: 6px 16px 12px;
     display: flex;
     gap: 8px;
   }
@@ -133,6 +141,10 @@
     background: var(--amber-glow);
     border-color: var(--amber);
   }
+  .dir-btn.disabled {
+    opacity: 0.25;
+    pointer-events: none;
+  }
   .dir-btn .dir-dest {
     font-size: 11px;
     font-weight: 600;
@@ -147,13 +159,8 @@
   }
   .dir-btn.active .dir-arrow { color: var(--amber); }
 
-  /* Ana ekran - sonraki trenler */
-  .main-board {
-    padding: 0 16px;
-    margin-bottom: 16px;
-  }
+  .main-board { padding: 0 16px; margin-bottom: 16px; }
 
-  /* Büyük sayaç */
   .countdown-card {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -206,12 +213,7 @@
     letter-spacing: 0.04em;
   }
 
-  /* Sonraki 2 tren */
-  .upcoming-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
+  .upcoming-row { display: flex; gap: 8px; margin-bottom: 10px; }
   .upcoming-card {
     flex: 1;
     background: var(--panel);
@@ -233,13 +235,8 @@
     color: var(--text);
     letter-spacing: 0.04em;
   }
-  .up-wait {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
+  .up-wait { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-  /* Tüm saatler */
   .section-header {
     font-size: 10px;
     color: var(--muted);
@@ -265,7 +262,6 @@
     font-variant-numeric: tabular-nums;
     color: var(--muted);
     letter-spacing: 0.03em;
-    transition: all 0.2s;
   }
   .tt-cell.past { opacity: 0.3; }
   .tt-cell.next {
@@ -274,10 +270,7 @@
     color: var(--amber);
     font-weight: 600;
   }
-  .tt-cell.soon {
-    border-color: var(--amber-dim);
-    color: var(--text);
-  }
+  .tt-cell.soon { border-color: var(--amber-dim); color: var(--text); }
   .tt-cell.service-ended {
     font-size: 11px;
     padding: 10px 6px;
@@ -287,7 +280,6 @@
     border: 1px dashed var(--border);
   }
 
-  /* Info bar */
   .info-bar {
     padding: 0 16px;
     margin-bottom: 8px;
@@ -306,16 +298,6 @@
   }
   .info-pill span { color: var(--text); font-weight: 500; }
 
-  .no-service-msg {
-    text-align: center;
-    padding: 30px 16px;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  .no-service-msg strong { color: var(--text); display: block; font-size: 15px; margin-bottom: 6px; }
-
-  /* PWA tip */
   .pwa-tip {
     margin: 0 16px 16px;
     background: #0f1e38;
@@ -341,8 +323,17 @@
   <div class="route-label">Sirkeci &nbsp;⟷&nbsp; Kazlıçeşme &nbsp;·&nbsp; 8 durak · 8.3 km</div>
 </div>
 
-<!-- Durak seçimi -->
 <div class="stop-selector">
+  <div class="stop-btn" id="btn-sir" onclick="selectStop('sirkeci')">
+    <span class="terminal-tag">TERMINAL</span>
+    <span class="stop-name">Sirkeci</span>
+    <span class="stop-sub">T1 · Marmaray · İDO</span>
+  </div>
+  <div class="stop-btn" id="btn-kaz" onclick="selectStop('kazlıçeşme')">
+    <span class="terminal-tag">TERMINAL</span>
+    <span class="stop-name">Kazlıçeşme</span>
+    <span class="stop-sub">Marmaray</span>
+  </div>
   <div class="stop-btn active" id="btn-yeni" onclick="selectStop('yenikapı')">
     <span class="stop-name">Yenikapı</span>
     <span class="stop-sub">Marmaray · Metro</span>
@@ -353,25 +344,23 @@
   </div>
 </div>
 
-<!-- Yön seçimi -->
 <div class="dir-selector">
-  <div class="dir-btn active" id="btn-sir" onclick="selectDir('sirkeci')">
+  <div class="dir-btn active" id="btn-dir-sir" onclick="selectDir('sirkeci')">
     <span class="dir-arrow">←</span>
     <span class="dir-dest">Sirkeci</span>
   </div>
-  <div class="dir-btn" id="btn-kaz" onclick="selectDir('kazlıçeşme')">
+  <div class="dir-btn" id="btn-dir-kaz" onclick="selectDir('kazlıçeşme')">
     <span class="dir-arrow">→</span>
     <span class="dir-dest">Kazlıçeşme</span>
   </div>
 </div>
 
 <div id="pwa-tip" class="pwa-tip">
-  <strong>Ana Ekrana Ekle:</strong> Safari'de paylaş düğmesine dokun → "Ana Ekrana Ekle" seç. Uygulama gibi açılır, internet bağlantısı gerekmez.
+  <strong>Ana Ekrana Ekle:</strong> Safari'de paylaş düğmesine dokun → "Ana Ekrana Ekle" seç. İnternet bağlantısı olmadan da çalışır.
 </div>
 
-<!-- Ana pano -->
 <div class="main-board">
-  <div class="countdown-card" id="countdown-card">
+  <div class="countdown-card">
     <div class="next-label">Sonraki tren</div>
     <div class="countdown-row">
       <div>
@@ -381,7 +370,6 @@
       <div class="next-dep-time" id="next-time">--:--</div>
     </div>
   </div>
-
   <div class="upcoming-row">
     <div class="upcoming-card">
       <div class="up-label">2. tren</div>
@@ -407,6 +395,14 @@
 
 <script>
 const SCHEDULES = {
+  sirkeci: {
+    kazlıçeşme: ['06:00','06:25','06:50','07:15','07:40','08:05','08:30','08:55','09:20','09:45','10:10','10:35','11:00','11:25','11:50','12:15','12:40','13:05','13:30','13:55','14:20','14:45','15:10','15:35','16:00','16:25','16:50','17:15','17:40','18:05','18:30','18:55','19:20','19:45','20:10','20:35','21:00','21:25','21:50','22:15','22:40','23:05'],
+    sirkeci: null
+  },
+  kazlıçeşme: {
+    sirkeci: ['06:00','06:25','06:50','07:15','07:40','08:05','08:30','08:55','09:20','09:45','10:10','10:35','11:00','11:25','11:50','12:15','12:40','13:05','13:30','13:55','14:20','14:45','15:10','15:35','16:00','16:25','16:50','17:15','17:40','18:05','18:30','18:55','19:20','19:45','20:10','20:35','21:00','21:25','21:50','22:15','22:40'],
+    kazlıçeşme: null
+  },
   yenikapı: {
     sirkeci: ['06:12','06:37','07:02','07:27','07:52','08:17','08:42','09:07','09:32','09:57','10:22','10:47','11:12','11:37','12:02','12:27','12:52','13:17','13:42','14:07','14:32','14:57','15:22','15:47','16:12','16:37','17:02','17:27','17:52','18:17','18:42','19:07','19:32','19:57','20:22','20:47','21:12','21:37','22:02','22:27','22:52'],
     kazlıçeşme: ['06:09','06:34','06:59','07:24','07:49','08:14','08:39','09:04','09:29','09:54','10:19','10:44','11:09','11:34','11:59','12:24','12:49','13:14','13:39','14:04','14:29','14:54','15:19','15:44','16:09','16:34','16:59','17:24','17:49','18:14','18:39','19:04','19:29','19:54','20:19','20:44','21:09','21:34','21:59','22:24','22:49','23:14']
@@ -417,31 +413,47 @@ const SCHEDULES = {
   }
 };
 
+const TERMINAL_DIR = { sirkeci: 'kazlıçeşme', kazlıçeşme: 'sirkeci' };
+
 let selectedStop = 'yenikapı';
 let selectedDir = 'sirkeci';
 
 function selectStop(stop) {
   selectedStop = stop;
-  document.getElementById('btn-yeni').classList.toggle('active', stop === 'yenikapı');
-  document.getElementById('btn-koca').classList.toggle('active', stop === 'kocamustafapaşa');
+  ['sir','kaz','yeni','koca'].forEach(id => {
+    const map = {sir:'sirkeci',kaz:'kazlıçeşme',yeni:'yenikapı',koca:'kocamustafapaşa'};
+    document.getElementById('btn-'+id).classList.toggle('active', map[id] === stop);
+  });
+
+  const isTerminal = stop === 'sirkeci' || stop === 'kazlıçeşme';
+  if (isTerminal) {
+    const forcedDir = TERMINAL_DIR[stop];
+    selectedDir = forcedDir;
+    document.getElementById('btn-dir-sir').classList.toggle('active', forcedDir === 'sirkeci');
+    document.getElementById('btn-dir-kaz').classList.toggle('active', forcedDir === 'kazlıçeşme');
+    document.getElementById('btn-dir-sir').classList.toggle('disabled', stop === 'sirkeci');
+    document.getElementById('btn-dir-kaz').classList.toggle('disabled', stop === 'kazlıçeşme');
+  } else {
+    document.getElementById('btn-dir-sir').classList.remove('disabled');
+    document.getElementById('btn-dir-kaz').classList.remove('disabled');
+    document.getElementById('btn-dir-sir').classList.toggle('active', selectedDir === 'sirkeci');
+    document.getElementById('btn-dir-kaz').classList.toggle('active', selectedDir === 'kazlıçeşme');
+  }
   update();
 }
 
 function selectDir(dir) {
+  const isTerminal = selectedStop === 'sirkeci' || selectedStop === 'kazlıçeşme';
+  if (isTerminal) return;
   selectedDir = dir;
-  document.getElementById('btn-sir').classList.toggle('active', dir === 'sirkeci');
-  document.getElementById('btn-kaz').classList.toggle('active', dir === 'kazlıçeşme');
+  document.getElementById('btn-dir-sir').classList.toggle('active', dir === 'sirkeci');
+  document.getElementById('btn-dir-kaz').classList.toggle('active', dir === 'kazlıçeşme');
   update();
 }
 
 function timeToMinutes(t) {
   const [h, m] = t.split(':').map(Number);
   return h * 60 + m;
-}
-
-function nowMinutes() {
-  const n = new Date();
-  return n.getHours() * 60 + n.getMinutes();
 }
 
 function nowSeconds() {
@@ -457,9 +469,9 @@ function formatWait(diffMin) {
 
 function update() {
   const times = SCHEDULES[selectedStop][selectedDir];
-  const nowMin = nowMinutes();
-  const nowSec = nowSeconds();
+  if (!times) return;
 
+  const nowSec = nowSeconds();
   const firstTime = times[0];
   const lastTime = times[times.length - 1];
 
@@ -477,7 +489,6 @@ function update() {
     }
   }
 
-  const timetableEl = document.getElementById('timetable');
   const cdMin = document.getElementById('cdown-min');
   const cdUnit = document.getElementById('cdown-unit');
   const nextTimeEl = document.getElementById('next-time');
@@ -491,60 +502,37 @@ function update() {
     cdMin.className = 'countdown-min';
     cdUnit.textContent = 'sefer bitti';
     nextTimeEl.textContent = '';
-    up2t.textContent = '--';
-    up2w.textContent = 'bugün yok';
-    up3t.textContent = '--';
-    up3w.textContent = 'bugün yok';
+    up2t.textContent = '--'; up2w.textContent = 'bugün yok';
+    up3t.textContent = '--'; up3w.textContent = 'bugün yok';
   } else {
     const next = upcoming[0];
     const dMin = next.diffMin;
-
     cdMin.textContent = dMin === 0 ? 'HAYDİ' : dMin;
-
-    if (dMin === 0) {
-      cdMin.className = 'countdown-min now';
-      cdUnit.textContent = 'tren giriyor!';
-    } else if (dMin <= 3) {
-      cdMin.className = 'countdown-min urgent';
-      cdUnit.textContent = 'dakika';
-    } else {
-      cdMin.className = 'countdown-min';
-      cdUnit.textContent = 'dakika';
-    }
+    if (dMin === 0) { cdMin.className = 'countdown-min now'; cdUnit.textContent = 'tren giriyor!'; }
+    else if (dMin <= 3) { cdMin.className = 'countdown-min urgent'; cdUnit.textContent = 'dakika'; }
+    else { cdMin.className = 'countdown-min'; cdUnit.textContent = 'dakika'; }
     nextTimeEl.textContent = next.time;
-
-    if (upcoming[1]) {
-      up2t.textContent = upcoming[1].time;
-      up2w.textContent = formatWait(upcoming[1].diffMin);
-    } else {
-      up2t.textContent = '--';
-      up2w.textContent = 'yok';
-    }
-    if (upcoming[2]) {
-      up3t.textContent = upcoming[2].time;
-      up3w.textContent = formatWait(upcoming[2].diffMin);
-    } else {
-      up3t.textContent = '--';
-      up3w.textContent = 'yok';
-    }
+    if (upcoming[1]) { up2t.textContent = upcoming[1].time; up2w.textContent = formatWait(upcoming[1].diffMin); }
+    else { up2t.textContent = '--'; up2w.textContent = 'yok'; }
+    if (upcoming[2]) { up3t.textContent = upcoming[2].time; up3w.textContent = formatWait(upcoming[2].diffMin); }
+    else { up3t.textContent = '--'; up3w.textContent = 'yok'; }
   }
 
+  const timetableEl = document.getElementById('timetable');
   timetableEl.innerHTML = '';
   let anyFuture = false;
   for (let i = 0; i < times.length; i++) {
     const t = times[i];
     const tMin = timeToMinutes(t);
-    const diffMin = Math.ceil(tMin * 60 - nowSec) / 60;
+    const diffSec = tMin * 60 - nowSec;
+    const diffMin = diffSec / 60;
     const cell = document.createElement('div');
     cell.className = 'tt-cell';
     cell.textContent = t;
-
-    if (i === 0 && upcoming.length > 0 && t === upcoming[0].time) {
-      cell.classList.add('next');
-      anyFuture = true;
+    if (upcoming.length > 0 && t === upcoming[0].time && i === times.indexOf(upcoming[0].time)) {
+      cell.classList.add('next'); anyFuture = true;
     } else if (diffMin > 0 && diffMin <= 60) {
-      cell.classList.add('soon');
-      anyFuture = true;
+      cell.classList.add('soon'); anyFuture = true;
     } else if (diffMin > 60) {
       anyFuture = true;
     } else {
@@ -552,7 +540,6 @@ function update() {
     }
     timetableEl.appendChild(cell);
   }
-
   if (!anyFuture) {
     const end = document.createElement('div');
     end.className = 'tt-cell service-ended';
@@ -563,25 +550,19 @@ function update() {
 
 function updateClock() {
   const n = new Date();
-  const h = String(n.getHours()).padStart(2, '0');
-  const m = String(n.getMinutes()).padStart(2, '0');
-  const s = String(n.getSeconds()).padStart(2, '0');
-  document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+  const pad = x => String(x).padStart(2,'0');
+  document.getElementById('clock').textContent = pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
 }
 
-function tick() {
-  updateClock();
-  update();
-}
-
+function tick() { updateClock(); update(); }
 tick();
 setInterval(tick, 1000);
 
+selectStop('yenikapı');
+
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone = window.navigator.standalone === true;
-if (isIOS && !isStandalone) {
-  document.getElementById('pwa-tip').classList.add('show');
-}
+if (isIOS && !isStandalone) document.getElementById('pwa-tip').classList.add('show');
 </script>
 </body>
 </html>
