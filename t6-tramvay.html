@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="T6 Tramvay">
+<meta name="theme-color" content="#0a0e1a">
+<title>T6 Tramvay</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --panel: #111827;
+    --panel2: #1a2236;
+    --border: #1e2d4a;
+    --amber: #f59e0b;
+    --amber-dim: #78500a;
+    --amber-glow: rgba(245,158,11,0.12);
+    --green: #10b981;
+    --green-dim: #064e3b;
+    --blue: #3b82f6;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --dot: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    min-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  /* Header */
+  .header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px 10px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .line-badge {
+    background: #e84c3d;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+  .clock-live {
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    color: var(--amber);
+    font-variant-numeric: tabular-nums;
+  }
+  .route-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Durak seçici */
+  .stop-selector {
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+  }
+  .stop-btn {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stop-btn.active {
+    background: var(--amber-glow);
+    border-color: var(--amber);
+  }
+  .stop-btn .stop-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: block;
+  }
+  .stop-btn.active .stop-name { color: var(--amber); }
+  .stop-btn .stop-sub {
+    font-size: 9px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* Yön seçici */
+  .dir-selector {
+    padding: 0 16px 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .dir-btn {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dir-btn.active {
+    background: var(--amber-glow);
+    border-color: var(--amber);
+  }
+  .dir-btn .dir-dest {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .dir-btn.active .dir-dest { color: var(--amber); }
+  .dir-btn .dir-arrow {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .dir-btn.active .dir-arrow { color: var(--amber); }
+
+  /* Ana ekran - sonraki trenler */
+  .main-board {
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Büyük sayaç */
+  .countdown-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .countdown-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--amber);
+    border-radius: 14px 14px 0 0;
+  }
+  .next-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .countdown-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .countdown-min {
+    font-size: 56px;
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--amber);
+    line-height: 1;
+  }
+  .countdown-min.urgent { color: var(--red); }
+  .countdown-min.now { color: var(--green); }
+  .countdown-unit {
+    font-size: 14px;
+    color: var(--muted);
+    align-self: flex-end;
+    padding-bottom: 8px;
+  }
+  .next-dep-time {
+    font-size: 22px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    letter-spacing: 0.04em;
+  }
+
+  /* Sonraki 2 tren */
+  .upcoming-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .upcoming-card {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .up-label {
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .up-time {
+    font-size: 20px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    letter-spacing: 0.04em;
+  }
+  .up-wait {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Tüm saatler */
+  .section-header {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0 16px;
+    margin-bottom: 8px;
+  }
+  .timetable {
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .tt-cell {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 4px;
+    text-align: center;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    transition: all 0.2s;
+  }
+  .tt-cell.past { opacity: 0.3; }
+  .tt-cell.next {
+    background: var(--amber-glow);
+    border-color: var(--amber);
+    color: var(--amber);
+    font-weight: 600;
+  }
+  .tt-cell.soon {
+    border-color: var(--amber-dim);
+    color: var(--text);
+  }
+  .tt-cell.service-ended {
+    font-size: 11px;
+    padding: 10px 6px;
+    grid-column: 1 / -1;
+    color: var(--muted);
+    background: transparent;
+    border: 1px dashed var(--border);
+  }
+
+  /* Info bar */
+  .info-bar {
+    padding: 0 16px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .info-pill {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .info-pill span { color: var(--text); font-weight: 500; }
+
+  .no-service-msg {
+    text-align: center;
+    padding: 30px 16px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .no-service-msg strong { color: var(--text); display: block; font-size: 15px; margin-bottom: 6px; }
+
+  /* PWA tip */
+  .pwa-tip {
+    margin: 0 16px 16px;
+    background: #0f1e38;
+    border: 1px solid #1e3a6a;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: #60a5fa;
+    line-height: 1.5;
+    display: none;
+  }
+  .pwa-tip.show { display: block; }
+  .pwa-tip strong { color: #93c5fd; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <span class="line-badge">T6 / U3</span>
+    <span class="clock-live" id="clock">--:--:--</span>
+  </div>
+  <div class="route-label">Sirkeci &nbsp;⟷&nbsp; Kazlıçeşme &nbsp;·&nbsp; 8 durak · 8.3 km</div>
+</div>
+
+<!-- Durak seçimi -->
+<div class="stop-selector">
+  <div class="stop-btn active" id="btn-yeni" onclick="selectStop('yenikapı')">
+    <span class="stop-name">Yenikapı</span>
+    <span class="stop-sub">Marmaray · Metro</span>
+  </div>
+  <div class="stop-btn" id="btn-koca" onclick="selectStop('kocamustafapaşa')">
+    <span class="stop-name">K.M.Paşa</span>
+    <span class="stop-sub">Kocamustafapaşa</span>
+  </div>
+</div>
+
+<!-- Yön seçimi -->
+<div class="dir-selector">
+  <div class="dir-btn active" id="btn-sir" onclick="selectDir('sirkeci')">
+    <span class="dir-arrow">←</span>
+    <span class="dir-dest">Sirkeci</span>
+  </div>
+  <div class="dir-btn" id="btn-kaz" onclick="selectDir('kazlıçeşme')">
+    <span class="dir-arrow">→</span>
+    <span class="dir-dest">Kazlıçeşme</span>
+  </div>
+</div>
+
+<div id="pwa-tip" class="pwa-tip">
+  <strong>Ana Ekrana Ekle:</strong> Safari'de paylaş düğmesine dokun → "Ana Ekrana Ekle" seç. Uygulama gibi açılır, internet bağlantısı gerekmez.
+</div>
+
+<!-- Ana pano -->
+<div class="main-board">
+  <div class="countdown-card" id="countdown-card">
+    <div class="next-label">Sonraki tren</div>
+    <div class="countdown-row">
+      <div>
+        <div class="countdown-min" id="cdown-min">--</div>
+        <div class="countdown-unit" id="cdown-unit">dakika</div>
+      </div>
+      <div class="next-dep-time" id="next-time">--:--</div>
+    </div>
+  </div>
+
+  <div class="upcoming-row">
+    <div class="upcoming-card">
+      <div class="up-label">2. tren</div>
+      <div class="up-time" id="up2-time">--:--</div>
+      <div class="up-wait" id="up2-wait">-- dk</div>
+    </div>
+    <div class="upcoming-card">
+      <div class="up-label">3. tren</div>
+      <div class="up-time" id="up3-time">--:--</div>
+      <div class="up-wait" id="up3-wait">-- dk</div>
+    </div>
+  </div>
+</div>
+
+<div class="info-bar" id="info-bar">
+  <div class="info-pill">Sefer aralığı: <span>25 dk</span></div>
+  <div class="info-pill" id="info-first">İlk: <span>--:--</span></div>
+  <div class="info-pill" id="info-last">Son: <span>--:--</span></div>
+</div>
+
+<div class="section-header">Tüm seferler</div>
+<div class="timetable" id="timetable"></div>
+
+<script>
+const SCHEDULES = {
+  yenikapı: {
+    sirkeci: ['06:12','06:37','07:02','07:27','07:52','08:17','08:42','09:07','09:32','09:57','10:22','10:47','11:12','11:37','12:02','12:27','12:52','13:17','13:42','14:07','14:32','14:57','15:22','15:47','16:12','16:37','17:02','17:27','17:52','18:17','18:42','19:07','19:32','19:57','20:22','20:47','21:12','21:37','22:02','22:27','22:52'],
+    kazlıçeşme: ['06:09','06:34','06:59','07:24','07:49','08:14','08:39','09:04','09:29','09:54','10:19','10:44','11:09','11:34','11:59','12:24','12:49','13:14','13:39','14:04','14:29','14:54','15:19','15:44','16:09','16:34','16:59','17:24','17:49','18:14','18:39','19:04','19:29','19:54','20:19','20:44','21:09','21:34','21:59','22:24','22:49','23:14']
+  },
+  kocamustafapaşa: {
+    sirkeci: ['06:04','06:29','06:54','07:19','07:44','08:09','08:34','08:59','09:24','09:49','10:14','10:39','11:04','11:29','11:54','12:19','12:44','13:09','13:34','13:59','14:24','14:49','15:14','15:39','16:04','16:29','16:54','17:19','17:44','18:09','18:34','18:59','19:24','19:49','20:14','20:39','21:04','21:29','21:54','22:19','22:44'],
+    kazlıçeşme: ['06:13','06:38','07:03','07:28','07:53','08:18','08:43','09:08','09:33','09:58','10:23','10:48','11:13','11:38','12:03','12:28','12:53','13:18','13:43','14:08','14:33','14:58','15:23','15:48','16:13','16:38','17:03','17:28','17:53','18:18','18:43','19:08','19:33','19:58','20:23','20:48','21:13','21:38','22:03','22:28','22:53','23:18']
+  }
+};
+
+let selectedStop = 'yenikapı';
+let selectedDir = 'sirkeci';
+
+function selectStop(stop) {
+  selectedStop = stop;
+  document.getElementById('btn-yeni').classList.toggle('active', stop === 'yenikapı');
+  document.getElementById('btn-koca').classList.toggle('active', stop === 'kocamustafapaşa');
+  update();
+}
+
+function selectDir(dir) {
+  selectedDir = dir;
+  document.getElementById('btn-sir').classList.toggle('active', dir === 'sirkeci');
+  document.getElementById('btn-kaz').classList.toggle('active', dir === 'kazlıçeşme');
+  update();
+}
+
+function timeToMinutes(t) {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function nowMinutes() {
+  const n = new Date();
+  return n.getHours() * 60 + n.getMinutes();
+}
+
+function nowSeconds() {
+  const n = new Date();
+  return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+}
+
+function formatWait(diffMin) {
+  if (diffMin <= 0) return 'şimdi';
+  if (diffMin === 1) return '1 dk';
+  return diffMin + ' dk';
+}
+
+function update() {
+  const times = SCHEDULES[selectedStop][selectedDir];
+  const nowMin = nowMinutes();
+  const nowSec = nowSeconds();
+
+  const firstTime = times[0];
+  const lastTime = times[times.length - 1];
+
+  document.getElementById('info-first').innerHTML = 'İlk: <span>' + firstTime + '</span>';
+  document.getElementById('info-last').innerHTML = 'Son: <span>' + lastTime + '</span>';
+
+  const upcoming = [];
+  for (const t of times) {
+    const tMin = timeToMinutes(t);
+    const diffSec = tMin * 60 - nowSec;
+    const diffMin = Math.ceil(diffSec / 60);
+    if (diffMin >= -1) {
+      upcoming.push({ time: t, diffMin: diffMin < 0 ? 0 : diffMin });
+      if (upcoming.length >= 3) break;
+    }
+  }
+
+  const timetableEl = document.getElementById('timetable');
+  const cdMin = document.getElementById('cdown-min');
+  const cdUnit = document.getElementById('cdown-unit');
+  const nextTimeEl = document.getElementById('next-time');
+  const up2t = document.getElementById('up2-time');
+  const up2w = document.getElementById('up2-wait');
+  const up3t = document.getElementById('up3-time');
+  const up3w = document.getElementById('up3-wait');
+
+  if (upcoming.length === 0) {
+    cdMin.textContent = '--';
+    cdMin.className = 'countdown-min';
+    cdUnit.textContent = 'sefer bitti';
+    nextTimeEl.textContent = '';
+    up2t.textContent = '--';
+    up2w.textContent = 'bugün yok';
+    up3t.textContent = '--';
+    up3w.textContent = 'bugün yok';
+  } else {
+    const next = upcoming[0];
+    const dMin = next.diffMin;
+
+    cdMin.textContent = dMin === 0 ? 'HAYDİ' : dMin;
+
+    if (dMin === 0) {
+      cdMin.className = 'countdown-min now';
+      cdUnit.textContent = 'tren giriyor!';
+    } else if (dMin <= 3) {
+      cdMin.className = 'countdown-min urgent';
+      cdUnit.textContent = 'dakika';
+    } else {
+      cdMin.className = 'countdown-min';
+      cdUnit.textContent = 'dakika';
+    }
+    nextTimeEl.textContent = next.time;
+
+    if (upcoming[1]) {
+      up2t.textContent = upcoming[1].time;
+      up2w.textContent = formatWait(upcoming[1].diffMin);
+    } else {
+      up2t.textContent = '--';
+      up2w.textContent = 'yok';
+    }
+    if (upcoming[2]) {
+      up3t.textContent = upcoming[2].time;
+      up3w.textContent = formatWait(upcoming[2].diffMin);
+    } else {
+      up3t.textContent = '--';
+      up3w.textContent = 'yok';
+    }
+  }
+
+  timetableEl.innerHTML = '';
+  let anyFuture = false;
+  for (let i = 0; i < times.length; i++) {
+    const t = times[i];
+    const tMin = timeToMinutes(t);
+    const diffMin = Math.ceil(tMin * 60 - nowSec) / 60;
+    const cell = document.createElement('div');
+    cell.className = 'tt-cell';
+    cell.textContent = t;
+
+    if (i === 0 && upcoming.length > 0 && t === upcoming[0].time) {
+      cell.classList.add('next');
+      anyFuture = true;
+    } else if (diffMin > 0 && diffMin <= 60) {
+      cell.classList.add('soon');
+      anyFuture = true;
+    } else if (diffMin > 60) {
+      anyFuture = true;
+    } else {
+      cell.classList.add('past');
+    }
+    timetableEl.appendChild(cell);
+  }
+
+  if (!anyFuture) {
+    const end = document.createElement('div');
+    end.className = 'tt-cell service-ended';
+    end.textContent = 'Bugünkü seferler tamamlandı — yarın ' + firstTime + "'da başlar";
+    timetableEl.appendChild(end);
+  }
+}
+
+function updateClock() {
+  const n = new Date();
+  const h = String(n.getHours()).padStart(2, '0');
+  const m = String(n.getMinutes()).padStart(2, '0');
+  const s = String(n.getSeconds()).padStart(2, '0');
+  document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+}
+
+function tick() {
+  updateClock();
+  update();
+}
+
+tick();
+setInterval(tick, 1000);
+
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.navigator.standalone === true;
+if (isIOS && !isStandalone) {
+  document.getElementById('pwa-tip').classList.add('show');
+}
+</script>
+</body>
+</html>
